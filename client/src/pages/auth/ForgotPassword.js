@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Spin } from 'antd';
-import { auth, googleAuthProvider } from '../../config/firebase';
+import { auth } from '../../services/firebase';
 import { toast } from 'react-toastify';
 
 const ForgotPassword = ({ history }) => {

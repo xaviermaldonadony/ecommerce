@@ -10,8 +10,15 @@ import RegisterComplete from './pages/auth/RegisterComplete';
 import Home from './pages/Home';
 import Header from './components/nav/Header';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import History from './pages/user/History';
+import Password from './pages/user/Password';
+import Wishlist from './pages/user/Wishlist';
+import UserRoute from './components/routes/UserRoute';
+import AdminRoute from './components/routes/AdminRoute';
+import AdminDashboard from './pages/admin/Dashboard';
 
-import { auth } from './config/firebase';
+import { httpCurrentUser } from './utils/auth';
+import { auth } from './services/firebase';
 
 const App = () => {
 	const dispatch = useDispatch();
@@ -20,16 +27,24 @@ const App = () => {
 	useEffect(() => {
 		const unsubscribe = auth.onAuthStateChanged(async (user) => {
 			if (user) {
-				const idTokenResult = await user.getIdTokenResult();
-				// console.log('user', user);
+				try {
+					const idTokenResult = await user.getIdTokenResult();
+					const resUser = await httpCurrentUser(idTokenResult.token);
+					// console.log('resUser', resUser);
 
-				dispatch({
-					type: 'LOGGED_IN_USER',
-					payload: {
-						email: user.email,
-						token: idTokenResult.token,
-					},
-				});
+					dispatch({
+						type: 'LOGGED_IN_USER',
+						payload: {
+							name: resUser.data.name,
+							email: resUser.data.email,
+							token: idTokenResult.token,
+							role: resUser.data.role,
+							_id: resUser.data._id,
+						},
+					});
+				} catch (err) {
+					console.log(err);
+				}
 			}
 		});
 
@@ -46,10 +61,15 @@ const App = () => {
 				<Route exact path='/register' component={Register} />
 				<Route exact path='/register/complete' component={RegisterComplete} />
 				<Route exact path='/forgot/password' component={ForgotPassword} />
+				<UserRoute exact path='/user/history' component={History} />
+				<UserRoute exact path='/user/password' component={Password} />
+				<UserRoute exact path='/user/whishlist' component={Wishlist} />
+
+				<AdminRoute exact path='/admin/dashboard' component={AdminDashboard} />
 			</Switch>
 		</>
 	);
 };
 export default App;
 
-// 19
+// 45

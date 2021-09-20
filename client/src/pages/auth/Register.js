@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { auth } from '../../config/firebase';
+import { auth } from '../../services/firebase';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 
@@ -22,8 +22,9 @@ const Register = ({ history }) => {
 
 		// Checks if email addres taken
 		const emailRes = await auth.fetchSignInMethodsForEmail(email);
-
-		if (emailRes === 0) {
+		console.log(emailRes);
+		console.log(emailRes.length === 0);
+		if (emailRes.length === 0) {
 			//Create new user
 			const res = await auth.sendSignInLinkToEmail(email, config);
 			toast.success(

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { auth, googleAuthProvider } from '../../config/firebase';
+import { auth, googleAuthProvider } from '../../services/firebase';
 import { toast } from 'react-toastify';
 import { Button, Spin } from 'antd';
 import { GoogleOutlined, MailOutlined } from '@ant-design/icons';
+
+import { httpCreateOrUpdateUser } from '../../utils/auth';
 
 const Login = ({ history }) => {
 	const [email, setEmail] = useState('xaviermaldonadony@hotmail.com');
@@ -19,6 +21,31 @@ const Login = ({ history }) => {
 		}
 	}, [user, history]);
 
+	const roleBasedRedirect = (res) => {
+		if (res.data.role === 'admin') {
+			history.push('admin/dashboard');
+		} else {
+			history.push('/user/history');
+		}
+	};
+
+	const createOrUpdateUser = async (token) => {
+		const resUser = await httpCreateOrUpdateUser(token);
+		// console.log('CREAE ORUPDATE RES', resUser);
+
+		dispatch({
+			type: 'LOGGED_IN_USER',
+			payload: {
+				name: resUser.data.name,
+				email: resUser.data.email,
+				token,
+				role: resUser.data.role,
+				_id: resUser.data._id,
+			},
+		});
+		roleBasedRedirect(resUser);
+	};
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setLoading(true);
@@ -29,15 +56,7 @@ const Login = ({ history }) => {
 			const { user } = res;
 			const idTokenResult = await user.getIdTokenResult();
 
-			dispatch({
-				type: 'LOGGED_IN_USER',
-				payload: {
-					email: user.email,
-					token: idTokenResult.token,
-				},
-			});
-
-			history.push('/');
+			await createOrUpdateUser(idTokenResult.token);
 		} catch (error) {
 			console.log('err', error.message);
 			toast.error(error.message);
@@ -53,16 +72,7 @@ const Login = ({ history }) => {
 			const idTokenResult = await user.getIdTokenResult();
 			// console.log('user', user);
 			// console.log('idTokenResult', idTokenResult);
-
-			dispatch({
-				type: 'LOGGED_IN_USER',
-				payload: {
-					email: user.email,
-					token: idTokenResult.token,
-				},
-			});
-
-			history.push('/');
+			await createOrUpdateUser(idTokenResult.token);
 		} catch (error) {
 			// console.log('err', error.message);
 			toast.error(error.message);
