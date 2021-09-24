@@ -1,5 +1,5 @@
 const admin = require('../firebase');
-const User = require('../models/user.models');
+const User = require('../models/user.model');
 
 async function authCheck(req, res, next) {
 	const { authtoken } = req.headers;

@@ -62,8 +62,18 @@ const Header = () => {
 					title={user.name}
 					className='float-right ml-auto'
 				>
-					<Item key='setting:1'>Option 1</Item>
-					<Item key='setting:2'>Option 2</Item>
+					{user?.role === 'subscriber' && (
+						<Item key='userDashboard'>
+							<Link to='/user/history'>Dashboard</Link>
+						</Item>
+					)}
+
+					{user?.role === 'admin' && (
+						<Item key='adminDashboard'>
+							<Link to='/admin/dashboard'>Dashboard</Link>
+						</Item>
+					)}
+
 					<Item key='logout' onClick={logout} icon={<LogoutOutlined />}>
 						Logout
 					</Item>
