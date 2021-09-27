@@ -37,7 +37,7 @@ const Header = () => {
 
 	return (
 		<Menu onClick={handleClick} selectedKeys={[current]} mode='horizontal'>
-			<Item key='home' icon={<HomeOutlined />}>
+			<Item key='home' icon={<HomeOutlined />} className='txt-gray'>
 				<Link to='/'>Home</Link>
 			</Item>
 
@@ -46,12 +46,18 @@ const Header = () => {
 					<Item
 						key='register'
 						icon={<UserAddOutlined />}
-						className='float-right ml-auto'
+						className='float-right ml-auto txt-gray'
 					>
-						<Link to='/register'>Register</Link>
+						<Link to='/register' className='txt-gray'>
+							Register
+						</Link>
 					</Item>
 
-					<Item className='float-right' key='login' icon={<UserOutlined />}>
+					<Item
+						className='txt-gray float-right'
+						key='login'
+						icon={<UserOutlined />}
+					>
 						<Link to='/login'>Login</Link>
 					</Item>
 				</>
@@ -60,21 +66,26 @@ const Header = () => {
 					key='SubMenu'
 					icon={<SettingOutlined />}
 					title={user.name}
-					className='float-right ml-auto'
+					className='float-right ml-auto txt-gray'
 				>
 					{user?.role === 'subscriber' && (
-						<Item key='userDashboard'>
+						<Item key='userDashboard' className='txt-gray'>
 							<Link to='/user/history'>Dashboard</Link>
 						</Item>
 					)}
 
 					{user?.role === 'admin' && (
-						<Item key='adminDashboard'>
+						<Item key='adminDashboard' className='txt-gray'>
 							<Link to='/admin/dashboard'>Dashboard</Link>
 						</Item>
 					)}
 
-					<Item key='logout' onClick={logout} icon={<LogoutOutlined />}>
+					<Item
+						key='logout'
+						onClick={logout}
+						icon={<LogoutOutlined />}
+						className='txt-gray'
+					>
 						Logout
 					</Item>
 				</SubMenu>

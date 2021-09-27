@@ -85,7 +85,7 @@ const Login = ({ history }) => {
 			<div className='form-group'>
 				<input
 					type='email'
-					className='form-control p-1'
+					className='form-control p-1 txt-gray-dark'
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					placeholder='Your email'
@@ -96,7 +96,7 @@ const Login = ({ history }) => {
 			<div className='form-group'>
 				<input
 					type='password'
-					className='form-control p-1 '
+					className='form-control p-1 txt-gray-dark'
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
 					placeholder='Password'
@@ -140,7 +140,7 @@ const Login = ({ history }) => {
 						{loading ? (
 							<Spin size='large' className='d-flex justify-content-center' />
 						) : (
-							<h4>Login</h4>
+							<h4 className='txt-gray'>Login</h4>
 						)}
 						{loginForm()}
 					</div>

@@ -9,16 +9,20 @@ import CategoryForm from '../../../components/forms/CategoryForm';
 import LocalSearch from '../../../components/forms/LocalSearch';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import {
-	httpCreateCategory,
-	httpRemoveCategory,
-	httpGetCategories,
-} from '../../../utils/category';
+	httpCreateSubCategory,
+	httpRemoveSubCategory,
+	httpGetSubCategories,
+	httpUpdateSubCategory,
+} from '../../../utils/subCategory';
+import { httpGetCategories } from '../../../utils/category';
 
-const CategoryCreate = () => {
+const SubCategoryCreate = () => {
 	const { user } = useSelector((state) => state);
 	const [name, setName] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [categories, setCategories] = useState([]);
+	const [subCategories, setSubCategories] = useState([]);
+	const [category, setCategory] = useState([]);
 
 	const [keyword, setKeyword] = useState('');
 
@@ -30,9 +34,18 @@ const CategoryCreate = () => {
 		setCategories(res.data);
 	}, []);
 
+	const loadSubCategories = useCallback(async () => {
+		setLoading(true);
+		const res = await httpGetSubCategories();
+		// console.log(res);
+		setLoading(false);
+		setSubCategories(res.data);
+	}, []);
+
 	useEffect(() => {
 		loadCategories();
-	}, [loadCategories]);
+		loadSubCategories();
+	}, [loadCategories, loadSubCategories]);
 
 	const antIcon = <LoadingOutlined style={{ fontSize: 30 }} spin />;
 
@@ -41,11 +54,14 @@ const CategoryCreate = () => {
 		// console.log(name);
 		setLoading(true);
 		try {
-			const res = await httpCreateCategory({ name }, user.token);
+			const res = await httpCreateSubCategory(
+				{ name, parent: category },
+				user.token
+			);
 			setLoading(false);
 			setName('');
 			toast.success(`"${res.data.name}" has been created`);
-			await loadCategories();
+			await loadSubCategories();
 		} catch (err) {
 			setLoading(false);
 			console.log(err);
@@ -64,10 +80,10 @@ const CategoryCreate = () => {
 		setLoading(true);
 
 		try {
-			const res = await httpRemoveCategory(slug, user.token);
+			const res = await httpRemoveSubCategory(slug, user.token);
 			toast.success(`"${res.data.name}" deleted`);
 			setLoading(false);
-			await loadCategories();
+			await loadSubCategories();
 		} catch (err) {
 			setLoading(false);
 			if (err.response.data.status === 400) {
@@ -86,29 +102,47 @@ const CategoryCreate = () => {
 					<AdminNav />
 				</div>
 				<div className='col mt-5'>
-					<h4 className='txt-gray'>Create category</h4>
+					<h4 className='txt-gray'>Create Sub Category</h4>
+					<div className='form-group my-4'>
+						<label className='mr-sm-2 txt-gray' for='inlineFormCustomSelect'>
+							Select Category
+						</label>
+						<select
+							className='custom-select mr-sm-2 '
+							onChange={(e) => setCategory(e.target.value)}
+						>
+							<option>Choose...</option>
+							{categories.length > 0 &&
+								categories.map((c) => (
+									<option className='txt-gray' key={c._id} value={c._id}>
+										{c.name}
+									</option>
+								))}
+						</select>
+					</div>
 					<CategoryForm
 						handleSubmit={handleSubmit}
 						name={name}
 						setName={setName}
+						placeholder={'Enter sub category name'}
 					/>
 
 					<LocalSearch setKeyword={setKeyword} keyword={keyword} />
 					{loading && <Spin indicator={antIcon} className='col mx-auto' />}
 
-					{categories.filter(searched(keyword)).map((category) => (
+					{subCategories.filter(searched(keyword)).map((sc) => (
 						<div
-							key={category._id}
+							key={sc._id}
 							className='alert alert-secondary bg-light txt-gray rounded'
 						>
-							{category.name}
+							{sc.name}
 							<span
-								onClick={() => handleRemove(category.slug)}
+								onClick={() => handleRemove(sc.slug)}
 								className='btn btn-sm float-right'
 							>
 								<DeleteOutlined className='text-danger' />
 							</span>
-							<Link to={`/admin/category/${category.slug}`}>
+							<Link to={`/admin/subcategory/${sc.slug}`}>
 								<span className='btn btn-sm float-right'>
 									<EditOutlined className='text-primary' />
 								</span>
@@ -121,4 +155,4 @@ const CategoryCreate = () => {
 	);
 };
 
-export default CategoryCreate;
+export default SubCategoryCreate;

@@ -18,6 +18,8 @@ import AdminRoute from './components/routes/AdminRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CategoryCreate from './pages/admin/category/CategoryCreate';
 import CategoryUpdate from './pages/admin/category/CategoryUpdate';
+import SubCategoryCreate from './pages/admin/subCategory/SubCategoryCreate';
+import SubCategoryUpdate from './pages/admin/subCategory/SubCategoryUpdate';
 
 import { httpCurrentUser } from './utils/auth';
 import { auth } from './services/firebase';
@@ -72,6 +74,16 @@ const App = () => {
 					exact
 					path='/admin/category/:slug'
 					component={CategoryUpdate}
+				/>
+				<AdminRoute
+					exact
+					path='/admin/subcategory'
+					component={SubCategoryCreate}
+				/>
+				<AdminRoute
+					exact
+					path='/admin/subcategory/:slug'
+					component={SubCategoryUpdate}
 				/>
 			</Switch>
 		</>

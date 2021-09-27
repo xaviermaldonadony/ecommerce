@@ -10,3 +10,9 @@ body {
 .txt-gray {
 	color: #696868;
 }
+
+.txt-gray-light {
+	color: #e0e0e0;
+	/* color: #eeeeee; */
+	/* color: #f5f5f5; */
+}

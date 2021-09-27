@@ -9,18 +9,17 @@ import CategoryForm from '../../../components/forms/CategoryForm';
 import LocalSearch from '../../../components/forms/LocalSearch';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import {
-	httpCreateCategory,
-	httpRemoveCategory,
-	httpGetCategories,
-} from '../../../utils/category';
+	httpUpdateSubCategory,
+	httpGetSubCategory,
+} from '../../../utils/subCategory';
+import { httpGetCategories } from '../../../utils/category';
 
-const CategoryCreate = () => {
+const SubCategoryUpdate = ({ history, match }) => {
 	const { user } = useSelector((state) => state);
 	const [name, setName] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [categories, setCategories] = useState([]);
-
-	const [keyword, setKeyword] = useState('');
+	const [parent, setParent] = useState('');
 
 	const loadCategories = useCallback(async () => {
 		setLoading(true);
@@ -30,22 +29,39 @@ const CategoryCreate = () => {
 		setCategories(res.data);
 	}, []);
 
+	const loadSubCategory = useCallback(async () => {
+		const { slug } = match.params;
+		setLoading(true);
+
+		const res = await httpGetSubCategory(slug);
+		setLoading(false);
+		setName(res.data.name);
+		setParent(res.data.parent);
+	}, [match.params]);
+
 	useEffect(() => {
 		loadCategories();
-	}, [loadCategories]);
+		loadSubCategory();
+	}, [loadCategories, loadSubCategory]);
 
 	const antIcon = <LoadingOutlined style={{ fontSize: 30 }} spin />;
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		const { slug } = match.params;
 		// console.log(name);
 		setLoading(true);
 		try {
-			const res = await httpCreateCategory({ name }, user.token);
+			const res = await httpUpdateSubCategory(
+				slug,
+				{ name, parent },
+				user.token
+			);
 			setLoading(false);
+			toast.success(`"${res.data.name}" has been updated.`);
 			setName('');
-			toast.success(`"${res.data.name}" has been created`);
-			await loadCategories();
+			// await loadSubCategories();
+			history.push('/admin/subcategory');
 		} catch (err) {
 			setLoading(false);
 			console.log(err);
@@ -55,30 +71,6 @@ const CategoryCreate = () => {
 		}
 	};
 
-	const handleRemove = async (slug) => {
-		console.log(slug);
-		if (!window.confirm('Are you sure you want to delete')) {
-			return;
-		}
-
-		setLoading(true);
-
-		try {
-			const res = await httpRemoveCategory(slug, user.token);
-			toast.success(`"${res.data.name}" deleted`);
-			setLoading(false);
-			await loadCategories();
-		} catch (err) {
-			setLoading(false);
-			if (err.response.data.status === 400) {
-				toast.error(err.response.data);
-			}
-		}
-	};
-
-	//
-	const searched = (keyword) => (c) => c.name.toLowerCase().includes(keyword);
-
 	return (
 		<div className='container-fluid'>
 			<div className='row'>
@@ -86,39 +78,39 @@ const CategoryCreate = () => {
 					<AdminNav />
 				</div>
 				<div className='col mt-5'>
-					<h4 className='txt-gray'>Create category</h4>
+					<h4 className='txt-gray'>Update Sub Category</h4>
+					<div className='form-group my-4'>
+						<label className='mr-sm-2 txt-gray'>Select Category</label>
+						<select
+							className='custom-select mr-sm-2 '
+							onChange={(e) => setParent(e.target.value)}
+						>
+							<option>Choose...</option>
+							{categories.length > 0 &&
+								categories.map((c) => (
+									<option
+										className='txt-gray'
+										key={c._id}
+										value={c._id}
+										selected={c._id === parent}
+									>
+										{c.name}
+									</option>
+								))}
+						</select>
+					</div>
 					<CategoryForm
 						handleSubmit={handleSubmit}
 						name={name}
 						setName={setName}
+						placeholder={'Enter sub category name'}
 					/>
 
-					<LocalSearch setKeyword={setKeyword} keyword={keyword} />
 					{loading && <Spin indicator={antIcon} className='col mx-auto' />}
-
-					{categories.filter(searched(keyword)).map((category) => (
-						<div
-							key={category._id}
-							className='alert alert-secondary bg-light txt-gray rounded'
-						>
-							{category.name}
-							<span
-								onClick={() => handleRemove(category.slug)}
-								className='btn btn-sm float-right'
-							>
-								<DeleteOutlined className='text-danger' />
-							</span>
-							<Link to={`/admin/category/${category.slug}`}>
-								<span className='btn btn-sm float-right'>
-									<EditOutlined className='text-primary' />
-								</span>
-							</Link>
-						</div>
-					))}
 				</div>
 			</div>
 		</div>
 	);
 };
 
-export default CategoryCreate;
+export default SubCategoryUpdate;
